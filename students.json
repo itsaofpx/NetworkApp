@@ -1,0 +1,14 @@
+{
+    "1234": {
+        "name": "1234",
+        "password": "1234",
+        "enrolled_subjects": {
+            "CS401": {
+                "name": "Database Systems",
+                "credits": 3,
+                "grade": "B+"
+            }
+        },
+        "gpax": 3.5
+    }
+}

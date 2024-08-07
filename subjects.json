@@ -1,0 +1,22 @@
+{
+    "CS101": {
+        "name": "Intro to CS",
+        "credits": 3
+    },
+    "CS102": {
+        "name": "Data Structures",
+        "credits": 3
+    },
+    "CS201": {
+        "name": "Algorithms",
+        "credits": 3
+    },
+    "CS301": {
+        "name": "Operating Systems",
+        "credits": 3
+    },
+    "CS401": {
+        "name": "Database Systems",
+        "credits": 3
+    }
+}
