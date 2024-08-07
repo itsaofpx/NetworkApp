@@ -6,7 +6,7 @@ from protocol import create_response, parse_message
 from encryption import encrypt_message, decrypt_message
 from enrollment import EnrollmentSystem
 
-PORT = 5051
+PORT = 5050
 
 def log_with_timestamp(message):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")

@@ -15,7 +15,7 @@ def send_request(sock, request):
 
 def main():
     server_ip = '127.0.0.1'
-    server_port = 5051
+    server_port = 5050
 
     try:
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -66,11 +66,11 @@ def main():
 
         else:
             print("\n1. View Enrollable Subjects")
-            print("2. Enroll")
-            print("3. Unenroll")
-            print("4. Set Grade")
-            print("5. View GPAX")
-            print("6. View Enrolled Subjects")
+            print("2. View Enrolled Subjects")
+            print("3. Enroll")
+            print("4. Unenroll")
+            print("5. Set Grade")
+            print("6. View GPAX")
             print("7. Logout")
             choice = input("Choose an option: ")
 
@@ -81,37 +81,36 @@ def main():
                     print("Enrollable Subjects:")
                     try:
                         subjects_dict = eval(subjects)  # Be cautious with eval
-                        for idx, (code, details) in enumerate(subjects_dict.items(), start=1):
-                            print(f"{idx}. {code}: {details['name']} ({details['credits']} credits)")
+                        for code, details in subjects_dict.items():
+                            print(f"{code}: {details['name']} ({details['credits']} credits)")
                     except Exception as e:
                         print(f"Error parsing subjects: {e}")
-
             elif choice == '2':
-                subject_code = input("Enter Subject Code: ")
-                response = send_request(client_socket, create_message("ENROLL", subject_code))
-                if response:
-                    status_code, message, protocol_code = parse_response(response)
-                    print(f"{status_code} {message}\n{protocol_code}")
-
-            elif choice == '3':
                 response = send_request(client_socket, create_message("VIEW_ENROLLED_SUBJECTS"))
                 if response:
                     enrolled_subjects = response
                     try:
                         enrolled_dict = eval(enrolled_subjects)  # Be cautious with eval
                         print("Enrolled Subjects:")
-                        for idx, (code, details) in enumerate(enrolled_dict.items(), start=1):
-                            print(f"{idx}. {code}: {details['name']} ({details['credits']} credits)")
-                        subject_index = int(input("Enter the index of the subject to unenroll: ")) - 1
-                        subject_code = list(enrolled_dict.keys())[subject_index]
-                        response = send_request(client_socket, create_message("UNENROLL", subject_code))
-                        if response:
-                            status_code, message, protocol_code = parse_response(response)
-                            print(f"{status_code} {message}\n{protocol_code}")
+                        for code, details in enrolled_dict.items():
+                            print(f"{code}: {details['name']} ({details['credits']} credits)")
                     except Exception as e:
                         print(f"Error parsing enrolled subjects: {e}")
+            elif choice == '3':
+                subject_code = input("Enter Subject Code: ")
+                response = send_request(client_socket, create_message("ENROLL", subject_code))
+                if response:
+                    status_code, message, protocol_code = parse_response(response)
+                    print(f"{status_code} {message}\n{protocol_code}")
 
             elif choice == '4':
+                subject_code = input("Enter Subject Code: ")
+                response = send_request(client_socket, create_message("UNENROLL", subject_code))
+                if response:
+                    status_code, message, protocol_code = parse_response(response)
+                    print(f"{status_code} {message}\n{protocol_code}")
+
+            elif choice == '5':
                 subject_code = input("Enter Subject Code: ")
                 grade = input("Enter Grade (A, B+, B, C+, C, D+, D, F): ")
                 response = send_request(client_socket, create_message("SET_GRADE", subject_code, grade))
@@ -119,22 +118,11 @@ def main():
                     status_code, message, protocol_code = parse_response(response)
                     print(f"{status_code} {message}\n{protocol_code}")
 
-            elif choice == '5':
+            elif choice == '6':
                 response = send_request(client_socket, create_message("GPAX"))
                 if response:
                     print(response)
 
-            elif choice == '6':
-                response = send_request(client_socket, create_message("VIEW_ENROLLED_SUBJECTS"))
-                if response:
-                    enrolled_subjects = response
-                    try:
-                        enrolled_dict = eval(enrolled_subjects)  # Be cautious with eval
-                        print("Enrolled Subjects:")
-                        for idx, (code, details) in enumerate(enrolled_dict.items(), start=1):
-                            print(f"{idx}. {code}: {details['name']} ({details['credits']} credits)")
-                    except Exception as e:
-                        print(f"Error parsing enrolled subjects: {e}")
 
             elif choice == '7':
                 response = send_request(client_socket, create_message("LogOut"))
