@@ -1,20 +1,28 @@
 import socket
+from protocol import create_message, parse_response, create_response
 from encryption import encrypt_message, decrypt_message
 
 def send_request(sock, request):
-    encrypted_request = encrypt_message(request)
-    sock.send(encrypted_request)
-    response = sock.recv(4096)
-    decrypted_response = decrypt_message(response)
-    print(decrypted_response)
-    return decrypted_response
+    try:
+        encrypted_request = encrypt_message(request)
+        sock.sendall(encrypted_request)
+        response = sock.recv(4096)
+        decrypted_response = decrypt_message(response)
+        return decrypted_response
+    except Exception as e:
+        print(f"Error in sending/receiving data: {e}")
+        return None
 
 def main():
     server_ip = '127.0.0.1'
-    server_port = 9999
+    server_port = 5051
 
-    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client_socket.connect((server_ip, server_port))
+    try:
+        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        client_socket.connect((server_ip, server_port))
+    except Exception as e:
+        print(f"Could not connect to server: {e}")
+        return
 
     logged_in = False
 
@@ -29,22 +37,33 @@ def main():
                 student_id = input("Enter Student ID: ")
                 name = input("Enter Name: ")
                 password = input("Enter Password: ")
-                send_request(client_socket, f"SIGNUP {student_id} {name} {password}")
+                response = send_request(client_socket, create_message("SIGNUP", student_id, name, password))
+                if response:
+                    status_code, message, protocol_code = parse_response(response)
+                    print(f"{status_code} {message}\n{protocol_code}")
 
             elif choice == '2':
                 student_id = input("Enter Student ID: ")
                 password = input("Enter Password: ")
-                response = send_request(client_socket, f"LOGIN {student_id} {password}")
-                if "Login successful" in response:
-                    logged_in = True
+                response = send_request(client_socket, create_message("LOGIN", student_id, password))
+                if response:
+                    status_code, message, protocol_code = parse_response(response)
+                    print(f"{status_code} {message}\n{protocol_code}")
+                    if status_code == 200:
+                        logged_in = True
 
             elif choice == '3':
-                send_request(client_socket, "EXIT")
+                response = send_request(client_socket, create_message("EXIT"))
+                if response:
+                    status_code, message, protocol_code = parse_response(response)
+                    print(f"{status_code} {message}\n{protocol_code}")
                 break
 
             else:
-                print("Invalid option. Try again.")
-        
+                response = create_response(400, "Invalid option selected.", "INVALID_OPTION")
+                status_code, message, protocol_code = parse_response(response)
+                print(f"{status_code} {message}\n{protocol_code}")
+
         else:
             print("\n1. View Enrollable Subjects")
             print("2. Enroll")
@@ -56,41 +75,79 @@ def main():
             choice = input("Choose an option: ")
 
             if choice == '1':
-                subjects = send_request(client_socket, "VIEW_SUBJECTS")
-                print("Enrollable Subjects:")
-                for code, details in eval(subjects).items():
-                    print(f"{code}: {details['name']} ({details['credits']} credits)")
+                response = send_request(client_socket, create_message("VIEW_SUBJECTS"))
+                if response:
+                    subjects = response
+                    print("Enrollable Subjects:")
+                    try:
+                        subjects_dict = eval(subjects)  # Be cautious with eval
+                        for idx, (code, details) in enumerate(subjects_dict.items(), start=1):
+                            print(f"{idx}. {code}: {details['name']} ({details['credits']} credits)")
+                    except Exception as e:
+                        print(f"Error parsing subjects: {e}")
 
             elif choice == '2':
                 subject_code = input("Enter Subject Code: ")
-                send_request(client_socket, f"ENROLL {subject_code}")
+                response = send_request(client_socket, create_message("ENROLL", subject_code))
+                if response:
+                    status_code, message, protocol_code = parse_response(response)
+                    print(f"{status_code} {message}\n{protocol_code}")
 
             elif choice == '3':
-                subject_code = input("Enter Subject Code: ")
-                send_request(client_socket, f"UNENROLL {subject_code}")
+                response = send_request(client_socket, create_message("VIEW_ENROLLED_SUBJECTS"))
+                if response:
+                    enrolled_subjects = response
+                    try:
+                        enrolled_dict = eval(enrolled_subjects)  # Be cautious with eval
+                        print("Enrolled Subjects:")
+                        for idx, (code, details) in enumerate(enrolled_dict.items(), start=1):
+                            print(f"{idx}. {code}: {details['name']} ({details['credits']} credits)")
+                        subject_index = int(input("Enter the index of the subject to unenroll: ")) - 1
+                        subject_code = list(enrolled_dict.keys())[subject_index]
+                        response = send_request(client_socket, create_message("UNENROLL", subject_code))
+                        if response:
+                            status_code, message, protocol_code = parse_response(response)
+                            print(f"{status_code} {message}\n{protocol_code}")
+                    except Exception as e:
+                        print(f"Error parsing enrolled subjects: {e}")
 
             elif choice == '4':
                 subject_code = input("Enter Subject Code: ")
                 grade = input("Enter Grade (A, B+, B, C+, C, D+, D, F): ")
-                send_request(client_socket, f"SET_GRADE {subject_code} {grade}")
+                response = send_request(client_socket, create_message("SET_GRADE", subject_code, grade))
+                if response:
+                    status_code, message, protocol_code = parse_response(response)
+                    print(f"{status_code} {message}\n{protocol_code}")
 
             elif choice == '5':
-                send_request(client_socket, "GPAX")
+                response = send_request(client_socket, create_message("GPAX"))
+                if response:
+                    print(response)
 
             elif choice == '6':
-                enrolled_subjects = send_request(client_socket, "VIEW_ENROLLED_SUBJECTS")
-                print("Enrolled Subjects:")
-                for code, details in eval(enrolled_subjects).items():
-                    print(f"{code}: {details['name']} ({details['credits']} credits)")
+                response = send_request(client_socket, create_message("VIEW_ENROLLED_SUBJECTS"))
+                if response:
+                    enrolled_subjects = response
+                    try:
+                        enrolled_dict = eval(enrolled_subjects)  # Be cautious with eval
+                        print("Enrolled Subjects:")
+                        for idx, (code, details) in enumerate(enrolled_dict.items(), start=1):
+                            print(f"{idx}. {code}: {details['name']} ({details['credits']} credits)")
+                    except Exception as e:
+                        print(f"Error parsing enrolled subjects: {e}")
 
             elif choice == '7':
-                response = send_request(client_socket, "LogOut")
-                if "Logged out successfully" in response:
-                    logged_in = False
-
+                response = send_request(client_socket, create_message("LogOut"))
+                if response:
+                    status_code, message, protocol_code = parse_response(response)
+                    print(f"{status_code} {message}\n{protocol_code}")
+                    if status_code == 200:
+                        logged_in = False
 
             else:
-                print("Invalid option. Try again.")
+                response = create_response(400, "Invalid option selected.", "INVALID_OPTION")
+                status_code, message, protocol_code = parse_response(response)
+                print(f"{status_code} {message}\n{protocol_code}")
 
     client_socket.close()
 

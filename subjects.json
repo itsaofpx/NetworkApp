@@ -7,16 +7,80 @@
         "name": "Data Structures",
         "credits": 3
     },
-    "CS201": {
+    "CS103": {
         "name": "Algorithms",
         "credits": 3
     },
-    "CS301": {
+    "CS104": {
         "name": "Operating Systems",
         "credits": 3
     },
-    "CS401": {
+    "CS105": {
         "name": "Database Systems",
+        "credits": 3
+    },
+    "CS201": {
+        "name": "Computer Networks",
+        "credits": 3
+    },
+    "CS202": {
+        "name": "Software Engineering",
+        "credits": 3
+    },
+    "CS203": {
+        "name": "Web Development",
+        "credits": 3
+    },
+    "CS204": {
+        "name": "Machine Learning",
+        "credits": 3
+    },
+    "CS205": {
+        "name": "Artificial Intelligence",
+        "credits": 3
+    },
+    "CS301": {
+        "name": "Cybersecurity",
+        "credits": 3
+    },
+    "CS302": {
+        "name": "Human-Computer Interaction",
+        "credits": 3
+    },
+    "CS303": {
+        "name": "Game Development",
+        "credits": 3
+    },
+    "CS304": {
+        "name": "Mobile Application Development",
+        "credits": 3
+    },
+    "CS305": {
+        "name": "Cloud Computing",
+        "credits": 3
+    },
+    "CS401": {
+        "name": "Big Data",
+        "credits": 3
+    },
+    "CS402": {
+        "name": "Compilers",
+        "credits": 3
+    },
+    "CS403": {
+        "name": "Distributed Systems",
+        "credits": 3
+    },
+    "CS404": {
+        "name": "Database Management Systems",
+        "credits": 3
+    },
+    "CS405": {
+        "name": "Digital Logic Design",
+        "credits": 3
+    },
+    "CS406": {
+        "name": "Computer Architecture",
         "credits": 3
     }
 }
